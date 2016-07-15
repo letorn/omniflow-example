@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/jee 
+           http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<bean id="persistent.idFactory" class="org.copperengine.core.common.JdkRandomUUIDFactory" scope="singleton" />
+
+	<bean id="persistent.dependencyInjector" class="org.copperengine.spring.SpringDependencyInjector" scope="singleton" />
+
+	<bean id="persistent.poolManager" class="org.copperengine.core.common.DefaultProcessorPoolManager" scope="singleton">
+		<property name="processorPools">
+			<list>
+				<bean class="org.copperengine.core.persistent.PersistentPriorityProcessorPool">
+					<constructor-arg type="java.lang.String">
+						<value>P#DEFAULT</value>
+					</constructor-arg>
+					<constructor-arg type="org.copperengine.core.persistent.txn.TransactionController">
+						<ref bean="persistent.txnController" />
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="persistent.dbStorage" class="org.copperengine.core.persistent.ScottyDBStorage" scope="singleton">
+		<property name="checkDbConsistencyAtStartup" value="true" />
+		<property name="transactionController" ref="persistent.txnController" />
+		<property name="dialect" ref="persistent.dbDialect" />
+		<property name="batcher" ref="persistent.batcher" />
+	</bean>
+
+	<bean id="persistent.wfRepository" class="org.copperengine.core.wfrepo.FileBasedWorkflowRepository" scope="singleton"
+		init-method="start" destroy-method="shutdown">
+		<property name="sourceDirs">
+			<list>
+				<value>${workflow.source.dir}</value>
+			</list>
+		</property>
+		<property name="targetDir" value="${workflow.target.dir}" />
+		<property name="compilerOptionsProviders">
+			<list>
+				<bean class="org.copperengine.core.wfrepo.URLClassloaderClasspathProvider" />
+			</list>
+		</property>
+		<property name="loadNonWorkflowClasses" value="true" />
+	</bean>
+
+	<bean id="persistent.txnController" class="org.copperengine.core.persistent.txn.CopperTransactionController"
+		scope="singleton">
+		<property name="dataSource" ref="persistent.dataSourceWorkflow" />
+	</bean>
+
+	<bean id="persistent.dbDialect" class="org.copperengine.core.persistent.MySqlDialect" scope="singleton"
+		init-method="startup">
+		<property name="wfRepository" ref="persistent.wfRepository" />
+	</bean>
+
+	<bean id="persistent.batcher" class="org.copperengine.core.batcher.impl.BatcherImpl" scope="singleton"
+		init-method="startup" destroy-method="shutdown">
+		<constructor-arg type="int">
+			<value>10</value>
+		</constructor-arg>
+		<property name="batchRunner">
+			<bean class="org.copperengine.core.batcher.RetryingTxnBatchRunner">
+				<property name="dataSource" ref="persistent.dataSourceWorkflow" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="persistent.dataSourceWorkflow" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+		<property name="dataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" />
+		<property name="idleTimeout" value="20000" />
+		<property name="maximumPoolSize" value="10" />
+		<property name="connectionTimeout" value="20000" />
+		<property name="leakDetectionThreshold" value="200000" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="url">${mysql.url}</prop>
+				<prop key="user">${mysql.user}</prop>
+				<prop key="password">${mysql.pwd}</prop>
+				<prop key="prepStmtCacheSize">250</prop>
+				<prop key="prepStmtCacheSqlLimit">2048</prop>
+				<prop key="cachePrepStmts">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="persistent.engine" class="org.copperengine.core.persistent.PersistentScottyEngine" scope="singleton"
+		init-method="startup" destroy-method="shutdown">
+		<property name="idFactory" ref="persistent.idFactory" />
+		<property name="dependencyInjector" ref="persistent.dependencyInjector" />
+		<property name="processorPoolManager" ref="persistent.poolManager" />
+		<property name="dbStorage" ref="persistent.dbStorage" />
+		<property name="wfRepository" ref="persistent.wfRepository" />
+	</bean>
+
+</beans>

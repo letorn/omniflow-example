@@ -8,32 +8,32 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import example.leave.LeaveAdapter;
-import example.leave.LeaveData;
+import example.helloworld.HelloWorldAdapter;
+import example.helloworld.HelloWorldData;
 
 @Controller
-@RequestMapping("leave/")
-public class LeaveController
+@RequestMapping("helloworld/")
+public class HelloWorldController
 {
 
     @Autowired
-    private LeaveAdapter leaveAdapter;
+    private HelloWorldAdapter helloWorldAdapter;
 
     @RequestMapping("list.do")
     @ResponseBody
-    public List<LeaveData> list()
+    public List<HelloWorldData> list()
     {
-        List<LeaveData> dataList = new ArrayList<>();
-        dataList = leaveAdapter.getDataList();
+        List<HelloWorldData> dataList = new ArrayList<>();
+        dataList = helloWorldAdapter.getDataList();
         return dataList;
     }
 
     @RequestMapping("create.do")
     @ResponseBody
-    public LeaveData create()
+    public HelloWorldData create()
     {
-        LeaveData data = new LeaveData();
-        leaveAdapter.runWorkflow(data);
+        HelloWorldData data = new HelloWorldData();
+        helloWorldAdapter.runWorkflow(data);
         return data;
     }
 
@@ -41,7 +41,7 @@ public class LeaveController
     @ResponseBody
     public Boolean send(String cid, String sender)
     {
-        leaveAdapter.sendLeave(cid, sender);
+        helloWorldAdapter.sendHelloWorld(cid, sender);
         return true;
     }
 
@@ -49,7 +49,7 @@ public class LeaveController
     @ResponseBody
     public Boolean reply(String cid, String replier)
     {
-        leaveAdapter.replyLeave(cid, replier);
+        helloWorldAdapter.replyHelloWorld(cid, replier);
         return true;
     }
 

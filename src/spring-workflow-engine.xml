@@ -13,13 +13,14 @@
            http://www.springframework.org/schema/jee 
            http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
-	<context:property-placeholder location="classpath:workflow.properties" />
-	<context:component-scan base-package="example" />
-
-	<!-- <import resource="classpath:spring-workflow-engine.xml" /> -->
-	<import resource="classpath:spring-workflow-transient-engine.xml" />
-	<import resource="classpath:spring-workflow-persistent-engine.xml" />
-
-	<!-- <import resource="classpath:spring-workflow-service.xml" /> -->
+	<bean id="workflowEngine" class="example.TransientEngineFactory" factory-method="create" init-method="startup"
+		destroy-method="shutdown" lazy-init="true" scope="singleton">
+		<constructor-arg type="java.lang.String">
+			<value>${workflow.source.dir}</value>
+		</constructor-arg>
+		<constructor-arg type="java.lang.String">
+			<value>${workflow.target.dir}</value>
+		</constructor-arg>
+	</bean>
 
 </beans>

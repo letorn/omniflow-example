@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/jee 
+           http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<bean id="transient.idFactory" class="org.copperengine.core.common.JdkRandomUUIDFactory" scope="singleton" />
+
+	<bean id="transient.engineIdProvider" class="org.copperengine.core.EngineIdProviderBean" scope="singleton">
+		<constructor-arg type="java.lang.String">
+			<value>TransientEngine#DEFAULT</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="transient.dependencyInjector" class="org.copperengine.spring.SpringDependencyInjector" scope="singleton" />
+
+	<bean id="transient.poolManager" class="org.copperengine.core.common.DefaultProcessorPoolManager" scope="singleton">
+		<property name="processorPools">
+			<list>
+				<bean class="org.copperengine.core.tranzient.TransientPriorityProcessorPool">
+					<constructor-arg type="java.lang.String">
+						<value>T#DEFAULT</value>
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transient.ticketPoolManager" class="org.copperengine.core.common.DefaultTicketPoolManager" scope="singleton" />
+
+	<bean id="transient.timeoutManager" class="org.copperengine.core.tranzient.DefaultTimeoutManager" scope="singleton" />
+
+	<bean id="transient.statisticsCollector" class="org.copperengine.core.monitoring.NullRuntimeStatisticsCollector" scope="singleton" />
+
+	<bean id="transient.earlyResponseContainer" class="org.copperengine.core.tranzient.DefaultEarlyResponseContainer" scope="singleton" />
+
+	<bean id="transient.wfRepository" class="org.copperengine.core.wfrepo.FileBasedWorkflowRepository" scope="singleton">
+		<property name="sourceDirs">
+			<list>
+				<value>${workflow.source.dir}</value>
+			</list>
+		</property>
+		<property name="targetDir" value="${workflow.target.dir}" />
+		<property name="compilerOptionsProviders">
+			<list>
+				<bean class="org.copperengine.core.wfrepo.URLClassloaderClasspathProvider" />
+			</list>
+		</property>
+		<property name="loadNonWorkflowClasses" value="true" />
+	</bean>
+
+	<bean id="transient.engine" class="org.copperengine.core.tranzient.TransientScottyEngine" init-method="startup"
+		destroy-method="shutdown" scope="singleton">
+		<property name="idFactory" ref="transient.idFactory" />
+		<property name="engineIdProvider" ref="transient.engineIdProvider" />
+		<property name="dependencyInjector" ref="transient.dependencyInjector" />
+		<property name="poolManager" ref="transient.poolManager" />
+		<property name="ticketPoolManager" ref="transient.ticketPoolManager" />
+		<property name="timeoutManager" ref="transient.timeoutManager" />
+		<property name="statisticsCollector" ref="transient.statisticsCollector" />
+		<property name="earlyResponseContainer" ref="transient.earlyResponseContainer" />
+		<property name="wfRepository" ref="transient.wfRepository" />
+	</bean>
+
+</beans>

@@ -13,12 +13,9 @@
            http://www.springframework.org/schema/jee 
            http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
-	<!-- Workflow Beans -->
-	<bean id="leaveAdapter" class="workflow.adapter.leave.impl.LeaveAdapterImpl">
-		<property name="engine" ref="persistent.engine" />
+	<!-- Adapter Beans -->
+	<bean id="helloWorldAdapter" class="example.helloworld.HelloWorldAdapterImpl">
+		<!-- <property name="engine" ref="workflowEngine" /> -->
 	</bean>
 
-
-	<!-- Scheduler Beans -->
-	<bean id="schedulerBackChannel" class="org.copperengine.core.util.BackchannelDefaultImpl" />
 </beans>

@@ -1,41 +1,177 @@
-<html>
+<html ng-app="example">
 <head>
 <meta charset="UTF-8">
 <title>Index</title>
-<script type="text/javascript" src="public/jquery/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="public/angular/angular-1.4.7.min.js"></script>
 <script type="text/javascript">
+  var appServer = "http://localhost:8080/copper-example";
 
-  function hint(msg) {
-	  $('#hint').html($.isPlainObject(msg) ? JSON.stringify(msg) : msg);
-	  setTimeout(function() { $('#hint').html('') }, 1500);
-  }
-  
-  function askForLeaveClick() {
-    $.getJSON('leave/askforleave.do', function(data) {
-        hint(data);
-    });
-}
+  var ng = angular.module('example', []);
 
-  function approveRequestClick() {
-	  $.getJSON('leave/approverequest.do', function(data) {
-		  hint(data);
-	  });
-  }
-  
-  function setupRemindClick() {
-    $.getJSON('remind/setupremind.do', function(data) {
-        hint(data);
-    });
-  }
+  /////////////////////////////////////
+
+  ng.controller('WorkflowController', function($scope, $http, $interval) {
+
+    $scope.createHelloWorld = createHelloWorld;
+    $scope.sendHelloWorld = sendHelloWorld;
+    $scope.replyHelloWorld = replyHelloWorld;
+
+    $scope.createLeave = createLeave;
+    $scope.sendLeave = sendLeave;
+    $scope.replyLeave = replyLeave;
+    
+    activate();
+
+    ///////////////////////////////////
+
+    function activate() {
+      listHelloWorld();
+      listLeave();
+      
+      $interval(function () {
+        listHelloWorld();
+        listLeave();
+      }, 1800);
+    }
+
+    function listHelloWorld() {
+      $http.post(appServer + "/helloworld/list.do").success(function(list) {
+        $scope.helloWorldList = list;
+      });
+    }
+
+    function createHelloWorld() {
+      $http.post(appServer + "/helloworld/create.do").success(function(workflow) {
+        listHelloWorld();
+      });
+    }
+
+    function sendHelloWorld(data) {
+      data.processing = true;
+      $http.post(appServer + "/helloworld/send.do", {}, {
+        params : {
+          cid : data.cid,
+          sender: 'Developer'
+        }
+      }).success(function(workflow) {
+        listHelloWorld();
+      });
+    }
+
+    function replyHelloWorld(data) {
+      data.processing = true;
+      $http.post(appServer + "/helloworld/reply.do", {}, {
+        params : {
+          cid : data.cid,
+          replier: 'Mine'
+        }
+      }).success(function(workflow) {
+        listHelloWorld();
+      });
+    }
+
+    function listLeave() {
+      $http.post(appServer + "/leave/list.do").success(function(list) {
+        $scope.leaveList = list;
+      });
+    }
+
+    function createLeave() {
+      $http.post(appServer + "/leave/create.do").success(function(workflow) {
+        listLeave();
+      });
+    }
+
+    function sendLeave(data) {
+      data.processing = true;
+      $http.post(appServer + "/leave/send.do", {}, {
+        params : {
+          cid : data.cid,
+          sender: 'Developer'
+        }
+      }).success(function(workflow) {
+        listLeave();
+      });
+    }
+
+    function replyLeave(data) {
+      data.processing = true;
+      $http.post(appServer + "/leave/reply.do", {}, {
+        params : {
+          cid : data.cid,
+          replier: 'Mine'
+        }
+      }).success(function(workflow) {
+        listLeave();
+      });
+    }
+    
+  });
 </script>
 </head>
-<body>
-  <h1>Index<span id="hint" style="font-size:14px;color:red;margin-left:25px"></span></h1>
-  <h3>Workflow</h3>
-  <a href="javascript:askForLeaveClick()">Ask For Leave</a>&nbsp;
-  <a href="javascript:approveRequestClick()">Approve Request</a>&nbsp;
-
-  <h3>Scheduler</h3>
-  <a href="javascript:setupRemindClick()">Setup Remind</a>&nbsp;
+<body ng-controller="WorkflowController">
+	<h1>Copper Example</h1>
+	
+	<h3>Transient Workflow</h3>
+	<div>
+		<a href="javascript:" ng-click="createHelloWorld()">NEW</a>
+	</div>
+	<table>
+		<thead>
+			<tr>
+				<td width="160">cid</td>
+				<td width="100">status</td>
+				<td width="100">sender</td>
+				<td width="100">replier</td>
+				<td width="100">Operation</td>
+			</tr>
+		</thead>
+		<tbody ng-repeat="helloWorld in helloWorldList">
+			<tr>
+				<td>{{helloWorld.cid}}</td>
+				<td>{{helloWorld.status}}</td>
+				<td>{{helloWorld.sender}}</td>
+				<td>{{helloWorld.replier}}</td>
+				<td>
+				    <span ng-if="!helloWorld.processing">
+				        <a ng-if="helloWorld.status=='PEND_SEND'" href="javascript:" ng-click="sendHelloWorld(helloWorld)">SEND</a>
+                        <a ng-if="helloWorld.status=='PEND_REPLY'" href="javascript:" ng-click="replyHelloWorld(helloWorld)">REPLY</a>
+				    </span>
+                    <span ng-if="helloWorld.processing">PROCESSING</span>
+                </td>
+			</tr>
+		</tbody>
+	</table>
+	
+	   <h3>Persistent Workflow</h3>
+    <div>
+        <a href="javascript:" ng-click="createLeave()">NEW</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <td width="160">cid</td>
+                <td width="100">status</td>
+                <td width="100">sender</td>
+                <td width="100">replier</td>
+                <td width="100">Operation</td>
+            </tr>
+        </thead>
+        <tbody ng-repeat="leave in leaveList">
+            <tr>
+                <td>{{leave.cid}}</td>
+                <td>{{leave.status}}</td>
+                <td>{{leave.sender}}</td>
+                <td>{{leave.replier}}</td>
+                <td>
+                    <span ng-if="!leave.processing">
+                        <a ng-if="leave.status=='PEND_SEND'" href="javascript:" ng-click="sendLeave(leave)">SEND</a>
+                        <a ng-if="leave.status=='PEND_REPLY'" href="javascript:" ng-click="replyLeave(leave)">REPLY</a>
+                    </span>
+                    <span ng-if="leave.processing">PROCESSING</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>
