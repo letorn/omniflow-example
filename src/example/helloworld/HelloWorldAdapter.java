@@ -22,7 +22,7 @@ public class HelloWorldAdapter
     private List<HelloWorldData> dataList = new ArrayList<>();
 
     @Autowired
-    @Qualifier("transient.engine")
+    @Qualifier("persistent.engine")
     private ProcessingEngine engine;
 
     public void runWorkflow(HelloWorldData data)

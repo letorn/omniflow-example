@@ -16,9 +16,14 @@
 	<context:property-placeholder location="classpath:workflow.properties" />
 	<context:component-scan base-package="example" />
 
-	<!-- <import resource="classpath:spring-workflow-engine.xml" /> -->
-	<import resource="classpath:spring-workflow-transient-engine.xml" />
 	<import resource="classpath:spring-workflow-persistent-engine.xml" />
+
+	<bean id="auditTrail" class="org.copperengine.core.audit.BatchingAuditTrail" init-method="startup" scope="singleton">
+		<property name="batcher" ref="persistent.batcher" />
+		<property name="dataSource" ref="persistent.dataSourceWorkflow" />
+	</bean>
+
+	<bean class="org.copperengine.spring.JmxExporter" init-method="startup" destroy-method="shutdown" />
 
 	<!-- <import resource="classpath:spring-workflow-service.xml" /> -->
 

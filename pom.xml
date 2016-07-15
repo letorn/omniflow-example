@@ -17,13 +17,13 @@
 
 	<profiles>
 		<profile>
-			<id>development</id>
+			<id>devel</id>
 			<properties>
-				<mysql.url>jdbc:mysql://localhost:3306/copper_dev</mysql.url>
+				<mysql.url>jdbc:mysql://172.16.7.26:3306/omniflow_example</mysql.url>
 				<mysql.user>root</mysql.user>
 				<mysql.pwd>123456</mysql.pwd>
-				<workflow.source.dir>${webapp.root}/WEB-INF/classes/workflow/persistent</workflow.source.dir>
-				<workflow.target.dir>${webapp.root}/WEB-INF/flowclses</workflow.target.dir>
+				<workflow.source.dir>${webapp.root}/WEB-INF/classes/workflow</workflow.source.dir>
+                <workflow.target.dir>${webapp.root}/WEB-INF/flowclses</workflow.target.dir>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -32,11 +32,11 @@
 		<profile>
 			<id>junit</id>
 			<properties>
-				<mysql.url>jdbc:mysql://localhost:3306/copper_dev</mysql.url>
+				<mysql.url>jdbc:mysql://172.16.7.26:3306/omniflow_example</mysql.url>
 				<mysql.user>root</mysql.user>
 				<mysql.pwd>123456</mysql.pwd>
-				<workflow.source.dir>src/workflow/persistent</workflow.source.dir>
-				<workflow.target.dir>target/flowclses</workflow.target.dir>
+				<workflow.source.dir>src/workflow</workflow.source.dir>
+                <workflow.target.dir>target/flowclses</workflow.target.dir>
 			</properties>
 			<activation>
 				<activeByDefault>false</activeByDefault>
@@ -72,8 +72,8 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>spring-*.xml</include>
-					<include>*.properties</include>
-					<include>workflow/persistent/**</include>
+                    <include>*.properties</include>
+                    <include>workflow/**</include>
 				</includes>
 			</resource>
 		</resources>
@@ -171,14 +171,50 @@
 
 		<!-- log4j -->
 		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
+			<artifactId>log4j-core</artifactId>
 			<version>2.4.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-to-slf4j</artifactId>
 			<version>2.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>5.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-analysis</artifactId>
+			<version>5.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-commons</artifactId>
+			<version>5.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-tree</artifactId>
+			<version>5.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-util</artifactId>
+			<version>5.0.4</version>
 		</dependency>
 
 	</dependencies>
